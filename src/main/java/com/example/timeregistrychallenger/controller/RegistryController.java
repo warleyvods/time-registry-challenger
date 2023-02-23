@@ -10,7 +10,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
+import java.time.YearMonth;
 
 @RestController
 @RequiredArgsConstructor
@@ -34,7 +34,7 @@ public class RegistryController {
 
     @GetMapping("/folhas-de-ponto/{mes}")
     public ReportResponseDTO report(@PathVariable String mes) {
-        final var date = LocalDate.parse(mes + "-01");
-        return generateReport.execute(date);
+        YearMonth yearMonth = YearMonth.parse(mes);
+        return generateReport.execute(yearMonth.atDay(1));
     }
 }

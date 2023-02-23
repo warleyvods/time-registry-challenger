@@ -6,7 +6,6 @@ import com.example.timeregistrychallenger.controller.mappers.AlocationMapper;
 import com.example.timeregistrychallenger.controller.mappers.BeatMapper;
 import com.example.timeregistrychallenger.gateways.BeatGateway;
 import com.example.timeregistrychallenger.models.Beat;
-import com.example.timeregistrychallenger.repository.BeatRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
@@ -55,8 +54,6 @@ public class GenerateReport {
         return new ReportResponseDTO(month, totalHours, horasExcedidas, horasDevidas, beatResponseDTOS, alocationList);
     }
 
-
-
     private Duration getDurationMonth(List<Beat> beatList) {
         return beatList.stream()
                 .map(durationCalculate::getDuration)
@@ -68,7 +65,6 @@ public class GenerateReport {
         int totalWeek = daysOfMonth.workdays() * 8;
         return totalSaturday + totalWeek;
     }
-
 
     private DaysOfMonth getLaborDays(LocalDate startDate) {
         LocalDate start = LocalDate.of(startDate.getYear(), startDate.getMonthValue(), 1);
