@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 import static java.time.format.DateTimeFormatter.ofPattern;
@@ -19,34 +20,33 @@ import static java.time.format.DateTimeFormatter.ofPattern;
 @Component
 @RequiredArgsConstructor
 public class GenerateReport {
-
     private final BeatGateway beatGateway;
     private final DurationCalculate durationCalculate;
     private final AlocationMapper alocationMapper;
 
-    public ReportResponseDTO execute(final LocalDate date) {
-        final String month = date.format(ofPattern("yyyy-MM"));
-        final List<Beat> beats = beatGateway.findByCustomDate(date.getMonthValue(), date.getYear());
+    public ReportResponseDTO execute(LocalDate date) {
+        String month = date.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        List<Beat> beats = beatGateway.findByCustomDate(date.getMonthValue(), date.getYear());
 
-        final var alocationList = beats.stream()
-                .flatMap(beat -> beat.getAlocations().stream())
-                .map(alocationMapper::toDto)
+        var alocationList = beats.stream()
+                .flatMap(beat -> beat.getAlocations().stream().map(alocationMapper::toDto))
                 .toList();
 
-        final List<BeatResponseDTO> beatResponseDTOS = beats.stream().map(BeatMapper::toDTO).toList();
+        List<BeatResponseDTO> beatResponseDTOS = beats.stream()
+                .map(BeatMapper::toDTO)
+                .toList();
 
-        final Duration totalHours = getDurationMonth(beats);
-        final DaysOfMonth laborDays = getLaborDays(date);
-        final Integer maxHoursMonth = getMaxHoursMonth(laborDays);
+        Duration totalHours = getDurationMonth(beats);
+        DaysOfMonth laborDays = getLaborDays(date);
+        Integer maxHoursMonth = getMaxHoursMonth(laborDays);
+        Duration maxDurationHoursMonth = Duration.ofHours(maxHoursMonth);
 
-        final Duration maxDurationHoursMonth = Duration.ofHours(maxHoursMonth);
-
-        var horasDevidas = maxDurationHoursMonth.minus(totalHours);
+        Duration horasDevidas = maxDurationHoursMonth.minus(totalHours);
         if (horasDevidas.isNegative()) {
             horasDevidas = Duration.ZERO;
         }
 
-        var horasExcedidas = totalHours.minus(maxDurationHoursMonth);
+        Duration horasExcedidas = totalHours.minus(maxDurationHoursMonth);
         if (horasExcedidas.isNegative()) {
             horasExcedidas = Duration.ZERO;
         }
@@ -54,36 +54,35 @@ public class GenerateReport {
         return new ReportResponseDTO(month, totalHours, horasExcedidas, horasDevidas, beatResponseDTOS, alocationList);
     }
 
-    private Duration getDurationMonth(List<Beat> beatList) {
-        return beatList.stream()
+    private Duration getDurationMonth(List<Beat> beats) {
+        return beats.stream()
                 .map(durationCalculate::getDuration)
                 .reduce(Duration.ZERO, Duration::plus);
     }
 
     private Integer getMaxHoursMonth(DaysOfMonth daysOfMonth) {
-        int totalSaturday = daysOfMonth.saturdays() * 4;
-        int totalWeek = daysOfMonth.workdays() * 8;
-        return totalSaturday + totalWeek;
+        return daysOfMonth.workdays() * 8 + daysOfMonth.saturdays() * 4;
     }
 
-    private DaysOfMonth getLaborDays(LocalDate startDate) {
-        LocalDate start = LocalDate.of(startDate.getYear(), startDate.getMonthValue(), 1);
-        LocalDate endDate = startDate.withDayOfMonth(startDate.lengthOfMonth());
+    private DaysOfMonth getLaborDays(LocalDate date) {
+        LocalDate firstDayOfMonth = date.withDayOfMonth(1);
+        LocalDate lastDayOfMonth = date.withDayOfMonth(date.lengthOfMonth());
 
         int workdays = 0;
-        int saturday = 0;
-        for (LocalDate date = start; !date.isAfter(endDate); date = date.plusDays(1)) {
-            if (date.getDayOfWeek() == DayOfWeek.SATURDAY) {
-                saturday++;
-            }
+        int saturdays = 0;
 
-            if (date.getDayOfWeek() != DayOfWeek.SATURDAY && date.getDayOfWeek() != DayOfWeek.SUNDAY) {
+        for (LocalDate day = firstDayOfMonth; !day.isAfter(lastDayOfMonth); day = day.plusDays(1)) {
+            DayOfWeek dayOfWeek = day.getDayOfWeek();
+
+            if (dayOfWeek == DayOfWeek.SATURDAY) {
+                saturdays++;
+            } else if (dayOfWeek != DayOfWeek.SUNDAY) {
                 workdays++;
             }
         }
 
-        return new DaysOfMonth(workdays, saturday);
+        return new DaysOfMonth(workdays, saturdays);
     }
 
-    record DaysOfMonth(Integer workdays, Integer saturdays) {}
+    record DaysOfMonth(int workdays, int saturdays) {}
 }
