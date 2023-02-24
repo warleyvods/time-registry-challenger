@@ -15,8 +15,6 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
-import static java.time.format.DateTimeFormatter.ofPattern;
-
 @Component
 @RequiredArgsConstructor
 public class GenerateReport {

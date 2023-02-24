@@ -1,7 +1,5 @@
 package com.example.timeregistrychallenger.usecases;
 
-import com.example.timeregistrychallenger.controller.dtos.AlocationsRequestDTO;
-import com.example.timeregistrychallenger.controller.mappers.AlocationMapper;
 import com.example.timeregistrychallenger.exceptions.CannotAddAlocation;
 import com.example.timeregistrychallenger.gateways.AlocationGateway;
 import com.example.timeregistrychallenger.gateways.BeatGateway;
