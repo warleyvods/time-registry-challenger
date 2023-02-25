@@ -8,7 +8,7 @@ import java.time.Duration;
 @Component
 public class DurationCalculate {
 
-    public Duration getDuration(Beat beat) {
+    public Duration getDuration(final Beat beat) {
         Duration duration = Duration.ZERO;
         if (beat.getFirstHour() != null && beat.getSecondHour() != null) {
             duration = duration.plus(Duration.between(beat.getFirstHour(), beat.getSecondHour()));

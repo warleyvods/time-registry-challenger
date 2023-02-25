@@ -1,7 +1,7 @@
 package com.example.timeregistrychallenger.controller;
 
-import com.example.timeregistrychallenger.controller.dtos.BeatRequestDTO;
-import com.example.timeregistrychallenger.controller.dtos.BeatResponseDTO;
+import com.example.timeregistrychallenger.controller.dtos.requests.BeatRequestDTO;
+import com.example.timeregistrychallenger.controller.dtos.responses.BeatResponseDTO;
 import com.example.timeregistrychallenger.models.Beat;
 import com.example.timeregistrychallenger.usecases.BeatRegistry;
 import org.junit.jupiter.api.Test;

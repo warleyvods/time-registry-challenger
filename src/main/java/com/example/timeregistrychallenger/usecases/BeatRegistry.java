@@ -7,43 +7,42 @@ import com.example.timeregistrychallenger.models.Beat;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Objects;
+
+import static java.util.Arrays.asList;
+import static java.util.Optional.ofNullable;
 
 @Component
-@RequiredArgsConstructor
-public class BeatRegistry {
+public record BeatRegistry(BeatGateway beatGateway) {
 
-    private final BeatGateway beatGateway;
-
-    public Beat execute(LocalDateTime date) {
-        final LocalDate fromDate = date.toLocalDate();
-        final Beat beat = Optional.ofNullable(beatGateway.findByDayDate(fromDate))
-                .map(beatFounded -> setBeatHour(beatFounded, date))
-                .orElseGet(() -> beatGateway.saveBeat(new Beat(fromDate, date)));
+    public Beat execute(final LocalDateTime date) {
+        final Beat beat = ofNullable(beatGateway.findByDayDate(date.toLocalDate()))
+                .map(beatFound -> setBeatHour(beatFound, date))
+                .orElseGet(() -> beatGateway.saveBeat(new Beat(date.toLocalDate(), date)));
 
         return beatGateway.saveBeat(beat);
     }
 
-    private Beat setBeatHour(Beat beatFounded, LocalDateTime date) {
-        final var hours = Arrays.asList(
-                beatFounded.getFirstHour(),
-                beatFounded.getSecondHour(),
-                beatFounded.getThirdHour(),
-                beatFounded.getFourthHour());
+    private Beat setBeatHour(final Beat beatFound, final LocalDateTime time) {
+        final var hours = asList(
+                beatFound.getFirstHour(),
+                beatFound.getSecondHour(),
+                beatFound.getThirdHour(),
+                beatFound.getFourthHour()
+        );
 
-        if (hours.contains(date)) {
+        if (hours.contains(time)) {
             throw new ExistsHoursException("Horários já registrados");
         }
 
         if (hours.stream().anyMatch(Objects::isNull)) {
             int index = hours.indexOf(null);
             return switch (index) {
-                case 0 -> beatFounded.withFirstHour(date);
-                case 1 -> beatFounded.withSecondHour(date);
-                case 2 -> beatFounded.withThirdHour(date);
-                case 3 -> beatFounded.withFourthHour(date);
+                case 0 -> beatFound.withFirstHour(time);
+                case 1 -> beatFound.withSecondHour(time);
+                case 2 -> beatFound.withThirdHour(time);
+                case 3 -> beatFound.withFourthHour(time);
                 default -> null;
             };
         }
