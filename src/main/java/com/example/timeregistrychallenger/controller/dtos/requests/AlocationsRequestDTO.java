@@ -8,9 +8,9 @@ import java.time.LocalDate;
 public record AlocationsRequestDTO(
         @JsonProperty("dia")
         LocalDate day,
-        @JsonProperty("time")
+        @JsonProperty("tempo")
         Duration time,
-        @JsonProperty("projectName")
+        @JsonProperty("nomeProjeto")
         String projectName
 ) {
 }

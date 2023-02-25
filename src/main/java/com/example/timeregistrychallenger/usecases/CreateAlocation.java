@@ -18,7 +18,7 @@ public record CreateAlocation(BeatGateway beatGateway, DurationCalculate duratio
         final Duration duration = durationCalculate.getDuration(beat);
 
         if (duration.compareTo(alocation.getTempo()) < 0) {
-            throw new CannotAddAlocation("Não pode alocar time maior que o time trabalhado no dia.");
+            throw new CannotAddAlocation("Não pode alocar tempo maior que o tempo trabalhado no dia.");
         }
 
         return alocationGateway.save(alocation);

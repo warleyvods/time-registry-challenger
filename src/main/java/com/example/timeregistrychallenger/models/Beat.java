@@ -27,7 +27,7 @@ public class Beat {
     private LocalDateTime thirdHour;
     private LocalDateTime fourthHour;
 
-    @OneToMany(mappedBy = "beat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "beat", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Alocation> alocations = new ArrayList<>();
 
     public Beat(LocalDate dayDate, LocalDateTime firstHour) {
